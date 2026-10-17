@@ -1,0 +1,61 @@
+#pragma once
+
+#include "esp_err.h"
+#include "fmo_monitor_state.h"
+#include "fmo_wifi_profiles.h"
+#include "fmo_stations.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+
+#include <stdbool.h>
+#include <stdint.h>
+
+typedef enum {
+    FMO_UPDATE_WIFI,
+    FMO_UPDATE_EVENTS_LINK,
+    FMO_UPDATE_CONTROL_LINK,
+    FMO_UPDATE_CHANNEL,
+    FMO_UPDATE_SPEAKER,
+    FMO_UPDATE_HISTORY,
+    FMO_UPDATE_ERROR,
+} fmo_update_type_t;
+
+typedef struct {
+    fmo_update_type_t type;
+    bool connected;
+    bool speaking;
+    bool is_host;
+    bool cross_server;
+    uint32_t uid;
+    char callsign[16];
+    char grid[12];
+    char text[48];
+    fmo_history_t history;
+} fmo_update_t;
+
+typedef struct {
+    fmo_monitor_state_t state;
+    fmo_stations_t stations;
+    uint32_t speech_activity; // Retains a wake hint even if a short PTT ends before UI polling.
+    char error[48];
+    char connected_ssid[33];
+    char setup_ssid[33];
+    char setup_password[17];
+} fmo_snapshot_t;
+
+/* Starts the lifetime-owned worker. Queue must hold ONE fmo_snapshot_t. */
+esp_err_t fmo_network_start(QueueHandle_t update_queue);
+
+/* Non-blocking hint from the UI to query the current FMO channel again. */
+void fmo_network_request_refresh(void);
+void fmo_network_request_setup(void);
+
+void fmo_network_request_retry(void);
+/* Non-blocking device-menu APIs. */
+bool fmo_network_get_saved_wifi(fmo_wifi_list_t *list);
+bool fmo_network_request_wifi(const char *ssid);
+void fmo_network_cancel_setup(void);
+
+/* Nonblocking; false means another request or state publication owns the lock. */
+bool fmo_network_request_stations(uint32_t start);
+bool fmo_network_switch_station(uint32_t uid);

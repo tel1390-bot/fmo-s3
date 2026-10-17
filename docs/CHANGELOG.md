@@ -1,0 +1,204 @@
+<p align="right">
+  <a href="CHANGELOG.zh_CN.md">简体中文</a> · <strong>English</strong>
+</p>
+
+# Changelog
+
+## Unreleased
+
+- Match the station-list current-item marker to the saved Wi-Fi list: use a fixed right-side check mark, black on the selected row and orange otherwise. Reserve space beside station names so scrolling text cannot overlap the marker.
+
+- Clarify the setup QR page address hint with an explicit browser-open instruction, keeping the address on the same line.
+
+- Swap the main-screen long-press shortcuts: long confirm opens the station list and long UP opens network settings. Update the footer and button guide; retain long-confirm return in subpages and the boot-time UP Recovery gesture.
+
+- Use only the long-confirm return instruction in station-list waiting and fallback footers; the retry footer also includes the confirm-to-retry action. Use colon separators for each key action.
+
+- Clarify the setup details footer: press confirm to view the QR code, or hold confirm to return.
+
+- Clarify the setup QR footer: press confirm to view details, or hold confirm to return.
+
+- Simplify the empty saved-Wi-Fi list footer to the long-confirm return instruction.
+
+- Move the audio percentage to the right of connection status with a fixed right edge. Keep all page footers on one line in the same 14 px font, spell out both main-screen long-press shortcuts in a 14 px footer, use a shared UP/DOWN-selection and long-confirm-return hint for regular lists, and show applicable Wi-Fi and station actions. Verify volume extremes, status widths, page transitions and native rendering within the existing LVGL budget.
+
+- Rename the network menu entry from Retry Wi-Fi to Select Wi-Fi to describe the saved-network selection screen.
+
+- Add coordinator recovery for FMO connections that remain unavailable after power-on or during operation. After 30 seconds without an event link or confirmed channel, replace only the failed metadata clients and refresh DNS while retaining Wi-Fi and audio. Selecting the connected Wi-Fi also retries failed FMO links immediately. Preserve station-switch ownership and reconcile ambiguous results without resending commands. Host regressions cover startup, repeated failures, healthy-link isolation, setup/offline pauses and manual retry; physical power-cycle recovery still requires device validation.
+
+- Add on-device station switching: long UP opens a six-row paged list using the existing fonts, colors and single-line footer; OK switches directly and long OK returns. Keep audio playing while browsing, preserve volume/mute settings, mark the current station and scroll selected long names. Serialize station requests with channel polling, wait for audio shutdown before sending, clear old metadata, and confirm the actual UID before resuming. Reconcile failed, timed-out or disconnected switches without automatic resends. Cover paging, repeated input, late replies, partial sends, audio shutdown/restart and native UI allocation/layout under the existing 24 KiB pool. Physical-device switching and playback remain unverified.
+
+- Reduce saved Wi-Fi names from 16 px to 14 px, preserving the full existing glyph set through bounded glyph resampling. Balance the first/last row gaps against the status and footer while retaining five networks and the connected check mark.
+
+- Center saved Wi-Fi name letter bodies vertically, without letting underscores or descenders raise the rest of the text. Replace the connected-network wording with a compact check mark, retaining the FMO palette and a consistent name column.
+
+- Increase the gap between saved-network status and the first Wi-Fi row; keep five rows clear of the footer in the existing FMO layout.
+
+- Make Retry Wi-Fi open a five-entry saved-network selector in the FMO black/orange style. Mark the actual connected SSID, scroll the selected long name, and label the menu exit Return. Resolve selections by name in the network worker, preserve a healthy selected link, stop old DHCP callbacks before switching, and retain automatic fallback after a failed attempt. Test empty/deleted/reordered profiles, switching failures, real input routing and framebuffer/memory behavior.
+
+- Open device setup at the three-action FMO network menu, preserve its selection during repeated setup updates, and make QR/info views return to the menu with UP/DOWN or long OK. Retry Wi-Fi releases an active setup loop before trying saved networks; return/back closes the hotspot. Retain the black/orange FMO palette and verify production input routing, selection rendering and setup retry dispatch.
+
+- Add common Chinese punctuation and station-name symbols: curly quotes, dashes, ellipses, middle dots, currency/unit/math signs, circled numbers 1–20, Roman numerals I–X, arrows, stars and geometric shapes. Normalize sparse tiny font maps without filling Unicode gaps; verify symbol coverage and native channel rendering.
+
+- Fix missing fullwidth parentheses in channel names by adding U+FF01–U+FF5E glyphs from the existing Noto font. Preserve channel text and existing glyph metrics/bitmaps; add compact-font coverage and native UI regression checks for a Chinese name with fullwidth parentheses.
+
+- Reduce PCM critical-section work: reset metadata without clearing the 24 KiB backing array, use contiguous little-endian ring copies with odd-fragment handling, batch overflow accounting and pad only missing output samples. Preserve complete-message publication, buffering and mute/disconnect cleanup semantics. Recompute UI glyph layout only when displayed text/font mode changes, format history dates only when entries change and update the clock by minute; reset view caches on recreation. Add ring-wrap/overflow/reset and native UI redraw/cache regressions. Device timing and power improvements remain unmeasured.
+
+- Use playback-only I2S TX and ES8311 DAC/OUT mode for FMO audio, without allocating RX DMA, connecting DIN or configuring microphone gain. Keep the existing full-duplex BSP entry point for recording applications; reject mode changes after initialization and reads in playback-only mode. Audio buffering, Wi-Fi policy and output DMA timing are unchanged. Physical playback, memory savings and current consumption still require device validation.
+
+- Separate conversation audio from channel/event metadata recovery: Wi-Fi-ready audio retains its own reconnect/watchdog lifecycle, while Wi-Fi loss, setup, startup errors and mute still stop playback. Render live callsigns/grids from the event connection independently of channel confirmation; show a pending-confirmation hint only in the connection/channel rows and hide the unconfirmed cached channel name. Keep real PCM metering during metadata outages and add aggregate link-state/audio-readiness diagnostics. Verify production UI-timer routing, confirmation-outage rendering, recovery, setup/error/Wi-Fi stop conditions and native layout. This revision requires on-device validation.
+
+- Prevent same-channel confirmation starvation across talker changes while retaining stale-reply protection for different, unknown or expired channels; log expiry and invalid live metadata. Add bounded whole-message receive backpressure to avoid immediately dropping audio bursts in the existing 24 KiB ring. Replace audio PONG-only disconnection with a 90-second valid PCM/heartbeat activity watchdog; preserve TCP-error recovery and mute/offline cleanup. Regression coverage includes sustained bursts, maximum-size messages, interrupted waits, busy-stream liveness, idle recovery and repeated talker changes. Physical playback and the reported transient sync incident require validation with this image.
+
+- Rename the active-speaker status label to In Contact; keep the last-contact label after speech ends.
+
+- Use explicit orange backgrounds and dark text for every phone setup button, including Connect and Save. Disable native button appearance so mobile browsers keep the page palette, and dim disabled buttons consistently.
+
+- Improve fragmented conversation playback: decode TCP chunks and continuation frames into the existing 24 KiB ring, but publish samples only after the complete WebSocket message arrives. Keep the 1.536-second burst bound and short-tail draining without a second message buffer. Disable Wi-Fi modem sleep while audio is enabled and restore the previous mode on mute, offline or codec failure; this increases playback power use. Keep independent audio transport deadlines and aggregate receive/drop/invalid, committed/pending, output/source and codec-write timing diagnostics. Verify delayed remainder isolation, concurrent draining, 32 seconds of speech, burst order, full-second messages and power-mode lifecycle. Physical latency and continuity still require testing this revision.
+
+- Fix false channel synchronization after normal QSO history pushes by increasing bounded text assembly from 768 bytes to 2 KiB per socket. A live 20-entry history message was 953 bytes; the old overflow path cleared speech/channel state despite connected sockets. Preserve invalid-frame recovery and log only socket/frame sizes; verify production parsing with transport chunks, continuation frames, interleaved pings and subsequent PTT release.
+- Replace local radio-configuration polling with the three newest FMO event-history contacts. The QSO panel shows white 14 px bold callsigns above full Beijing timestamps (YYYY-MM-DD HH:MM:SS) in regular gray text. Sort unsorted histories, retain repeated contacts and missing-slot placeholders, and keep history updates independent of live PTT/channel state. Render dates inside the panel to preserve the 24 KiB LVGL memory budget.
+- Place speaking/last-contact status, the bold callsign and retained gray grid above QSO. Show cross-server speech in red for crossServer true/1, ordinary speech in orange and last-heard callsigns in white; clear stale flags on release, speaker changes or link/channel reset. Fit callsigns within the remaining width and center the yellow PCM bar between visible text and QSO, repainting both bar positions when its height changes. Balance panel padding and use one centered footer row with audio percentage (0% when muted) and the long-OK setup hint.
+
+- Reduce premature reconnects during brief LAN delays: allow 10 seconds for a single channel query, 15 seconds for confirmed-channel freshness and 30 seconds for WebSocket pongs. Match control send waits to the 3-second transport timeout, retain delayed-reply ownership and log reconnect reasons. Keep radio panel, speech status and callsign rows fixed when data first arrives. Add delayed-response, hard-timeout and empty/populated-layout regressions. On-device reconnect recovery remains unverified.
+
+- Replace the fixed speech underline with a yellow PCM RMS audio-level bar, using
+  bounded integer calculation, quiet-input gating, an 80 ms full-scale rise
+  and 500 ms fall. Update only the two bar rows at 20 Hz, using the existing
+  panel without a separate widget. Reserve the QR canvas before small page
+  objects to preserve contiguous redraw memory after animation. Clear
+  stale/muted/offline levels and protect against a reconnect during codec I/O.
+  Verify measurement, timing, playback lifecycle, native rendering/memory and
+  an installable setup firmware image, including BLE size/partition protection.
+  Physical playback and animation remain unverified.
+
+- Balance monitor spacing with a larger visible gap below the connection status, consistent channel/profile separation, and tighter speaker/footer alignment. Keep audio state, volume and the long-OK setup hint together; show refresh requests in the connection row. Verify active speech, last-heard, initial idle, errors and native memory/layout without rebuilding firmware.
+
+- Receive live conversation PCM from the FMO `/audio` WebSocket through the ES8311 speaker, with automatic 50% playback, bounded buffering, disconnect/mute cleanup, silent DMA priming and isolated failures. UP/DOWN adjusts volume, short OK toggles audio, long UP refreshes and long OK retains the network menu; show audio state/volume in the footer. Verify the live endpoint, PCM framing, worker lifecycle, controls and native UI; firmware and physical playback are not tested in this code-only update.
+
+- Center the clock on the screen and reclaim the hidden grid row for wider radio-profile line spacing, moving the callsign closer to the footer. Retain space for real setup, idle and error hints; validate native layout without rebuilding firmware.
+
+- Add a minute-resolution Beijing-time clock between FMO and battery. Synchronize asynchronously over SNTP after Wi-Fi connects, retain one service across reconnects, show `--:--` before valid time, and redraw the clock before wake-up. Verify minute/midnight transitions, unavailable time, reconnect initialization, UI layout and memory.
+
+- Hide speaker grid coordinates in both active-speech and last-heard views; retain the four-row radio configuration panel, bold callsigns and connection/setup error hints.
+
+- Add a portrait four-row radio configuration panel inspired by the supplied reference: device name, MHz frequency, antenna model and height in metres. Read local FMO physical configuration on connection and every 30 seconds; keep optional metadata independent of PTT/channel state, handle unset/invalid values and clear it on disconnect. Verify unit conversion, Chinese text, long rows, reconnects and native UI memory/layout.
+
+- Keep an already confirmed channel visible when speech starts or the talker changes; refresh the channel in the background. Discard pre-transition channel replies without blanking the UI or extending freshness. Preserve synchronization for unknown channels, disconnects and query failures; add parser regressions for repeated starts, short PTT and late replies.
+
+- Simplify monitor details to the grid without elapsed-time or station/host prefixes. Use licensed Montserrat Bold callsign glyphs at 32 px, with a 20 px bold fallback for long callsigns; retain regular setup-password text and verify native rendering.
+
+- Keep the confirmed channel and last-heard display after explicit PTT release (`isSpeaking: false/0`), including empty, null or omitted callsigns. Ignore unused release metadata, retain named-release matching and reject invalid starts. Add parser/state/UI regression tests for idle transitions, duplicate releases and delayed replies.
+
+- Fix setup AP access checks for IPv4-mapped IPv6 sockets so phones can open the setup page with the default dual-stack HTTP server. Keep station-interface requests blocked and add real-socket regression tests.
+
+- Recreate the FMO control connection on query timeout/partial sends so delayed replies cannot inherit a newer query. Retain the network worker through startup failures, clean up partial Wi-Fi initialization and support immediate menu retry.
+- Reject JSON-escaped NUL and overlong callsign/grid identifiers. Add controlled-clock query, startup-recovery and setup endpoint fault tests.
+- Add saved FMO hostname/IPv4 and port settings to setup, plus a worker-owned DNS/TCP port check using saved Wi-Fi. Keep session-token/AP access restrictions and distinguish port reachability from API compatibility.
+- Split the existing font losslessly into compact fallback fonts, preserving every existing glyph and bitmap without partition changes. Normalize only private temporary build configs and verify identical framebuffers and glyph coverage.
+
+- Balance the visible spacing above and below the setup connection QR.
+
+- Add a PDKPASS-style network menu (setup above retry), a Wi-Fi connection QR with click-OK credential view, immediate saved-network retry, and cancellable setup that restores only the current saved profiles. Cover controls, QR escaping, display wake behavior, and native rendering within the firmware memory budget.
+- Reset all application data after each complete firmware installation, including
+  reinstalling the same binary: clear saved Wi-Fi/FMO settings and legacy PDKPASS
+  caches/reminders. Preserve identity/Recovery and same-installation reboot data.
+  Package a reset request and commit the image marker only after cleanup succeeds;
+  interrupted cleanup retries before networking. Verify the resource payload.
+
+- Preserve Chinese channel names with validated UTF-8 and whole-character
+  truncation. Discard malformed live messages safely and prevent stale channel
+  replies from erasing a newer speaker.
+- Dim the screen after 30 idle seconds and sleep the LCD after 90 seconds.
+  Keep FMO networking and button scanning active; speech or a consumed first
+  button gesture wakes and redraws the screen. Keep setup and continuous speech
+  awake, pause battery polling while dark, and retry failed panel transitions.
+
+- Move the setup hotspot to `192.168.9.1/24` to avoid common home-LAN overlap.
+  Wait for the Wi-Fi station stop event before testing another credential so
+  late events from an earlier attempt cannot validate the new one. Log LVGL
+  pool usage at startup and check redraw headroom in the native UI test. The
+  setup page now distinguishes authentication, missing network, security-mode
+  and DHCP timeout failures. Add a macOS serial-log capture tool for device
+  diagnostics without flashing or sending commands.
+
+- Read battery SOC immediately on startup and then every two minutes instead
+  of every 30 seconds; FMO status refresh timing is unchanged.
+
+- Reduce the battery capsule from 44x22 to 32x16 pixels while retaining the
+  internal percentage and vertically centered status-bar alignment.
+
+- Translate monitor status and controls into Chinese and replace the BAT label
+  with an iOS-inspired battery capsule containing the percentage (red at 20% or
+  below, outlined when unavailable; charging is not inferred from SOC).
+
+- Center visible text vertically in channel and callsign rows, including
+  Chinese font padding, smaller long-callsign fonts, and setup transitions.
+
+- Replace the monitor's pixel scenery with a black/orange/white FMO-inspired
+  portrait UI, larger active-talker callsigns, Chinese channel glyphs, and a
+  matching setup screen. Add native LVGL rendering tests and framebuffer previews.
+
+- Save up to five Wi-Fi profiles with legacy migration, explicit deletion and
+  bounded automatic failover; prefer the last successful network, retain healthy
+  connections, and recreate FMO clients after Wi-Fi loss.
+
+- Add password-protected phone Wi-Fi setup, nearby SSID selection, verified NVS
+  persistence, long-OK reconfiguration, default fmo.local mDNS resolution, and
+  credential-free installation builds via `./tools/validate.sh --setup`.
+
+- Fix configured firmware packaging; separate dummy network validation artifacts.
+- Recover clean WebSocket closes and failed client creation; publish complete state
+  snapshots, invalidate stale channels, and clear callsigns after channel changes.
+- Handle fragmented WebSocket messages; avoid unchanged label allocations, remove
+  unused demo build inputs, and add heap/stack diagnostics and regression tests.
+
+- Replaced the reference demo menu with an FMO live monitor application. It
+  connects to the local FMO `/events` and `/ws` WebSocket endpoints, displays
+  the selected channel and current or last-heard callsign, reports connection
+  and battery state, supports backlight controls and manual channel refresh,
+  and keeps Wi-Fi/FMO credentials out of tracked files through project Kconfig.
+
+- Added the supplied 80-byte CW2017 profile for the specified 520 mAh cell, including content/update-flag checks, verified writes, the required restart sequence, and bounded SOC-readiness polling.
+
+- Reorganized the documentation by function area with a dual entry point: the root `AGENTS.md` is now a thin router (hard constraints + task routing only) and the detailed AI workflow lives in `docs/development/ai-guide.md`; `agent-guide.md` was folded in. `docs/development/` gained a second level (`engineering/`, `ci/`, `release/`), and the `plays/` application archive and `experiences/` moved into a `docs/reference/` area with a dedicated README. Removed `docs/software-design/` (empty scaffold); folded the three `assets/{fonts,images,music}/README` leaves into the `assets/` README; flattened the six `project-completion` sub-documents into a single file; and unified each directory to a single README, eliminating every `INDEX` file and a duplicated experience index. All cross-references and bibliographic links were updated; no content was dropped.
+
+- Made mini-program BLE install compatibility a template-level invariant: fixed
+  protected `cardid`/Recovery partitions, retained the five-second UP-key
+  Recovery boot hook, and added CI validation for merged-image structure,
+  partition MD5/ranges, the 3 MB app limit, and protected payload exclusion.
+- Documented a release-title convention for multi-app releases: name tags as `v<version>-<app-name>` (e.g. `v0.1.0-voice-keychain`) so the release title carries the version and the app, and confirm the title after the release is published so a release list is scannable by app.
+- Added a post-release follow-up workflow: an `issue-suggestions` skill for filing user feedback as issues against the upstream project, an `experience-pr` skill for submitting reusable development experience as a documentation PR, a `docs/experiences/` directory for per-entry experience files, and supporting `project-completion`, `file-issues`, and experience-index documents.
+- Simplified the tracked repository root: moved GitHub-recognized community documents into `.github/`, moved the changelog into `docs/`, updated every reference, and added a root-document allowlist to repository checks.
+- Repository-wide language policy: every maintained Markdown default `.md` file is English, Simplified Chinese uses a paired `.zh_CN.md`, and both provide language switches. Static checks reject missing peers, missing switches, and Chinese prose in English defaults.
+- Phase one of the AI development workflow: streamlined task-based context routing, unified local/CI validation, added PR checks and a template, and committed the dependency lock for reproducible builds.
+- PR review fixes: pinned GitHub Actions to full commit SHAs, split build/release jobs by least privilege, disabled persisted sync checkout credentials, added Feature Request and Usage Question forms, clarified private security-report fallback, and corrected stale README, CI-trigger, and branch descriptions.
+- Changed commit titles, PR titles, and PR bodies from Chinese-default to English; updated the Chinese punctuation rule so it no longer applies to PR descriptions.
+- Reworked `build-firmware.yml` to pass `SDKCONFIG_DEFAULTS=sdkconfig.defaults`, enable `partitions.csv`, preserve the 8 MB image header, merge a flashable `FoloToy-AI-Passport-full.bin`, publish only that artifact, and use Actions cache v5.
+- Integrated upstream PR #6 to resolve PR #4 conflicts: Wi-Fi, Bluetooth LE, radio lifecycle, and low-power demos; a 3 MB factory partition; build/menu/configuration updates; hardware-guide coverage; and bilingual capability tables.
+- Defined English imperative Conventional Commit formatting for both commits and PR titles.
+- Removed stale sync-workflow template comments and generalized an irrelevant Redis TTL rule to cache components.
+- Added Chinese punctuation, credential safety, and recoverable file-deletion conventions.
+- Expanded source-comment requirements for functions, state, ownership, concurrency, timing, registers, and magic values.
+- Removed AI execution instructions from product READMEs so they remain human-facing product and repository overviews.
+- Added `docs/development/agent-guide.md` as the focused AI workflow guide.
+- Updated `AGENTS.md`, `docs/INDEX.md`, and the development index for the agent guide.
+- Documented why the root README path is reserved for fork owners and how GitHub README precedence supports it.
+- Created `main-update` from the upstream-aligned baseline and combined the repository-structure, firmware-CI, and upstream-sync work.
+- Corrected the merged documentation index, workflow path, project tree, and CI references.
+- Moved CI documentation from software design to `docs/development/`.
+- Moved fork-only documentation assets from `assets/docs/` to `docs/assets/`.
+- Moved the upstream English/Chinese project READMEs under `docs/` and renamed the documentation catalog to `docs/INDEX.md`.
+- Initialized `AGENTS.md`, `CLAUDE.md`, and `CHANGELOG.md`.
+- Standardized the initial project README language filenames.
+- Added the `docs/`, `assets/`, and `skills/` directory structure.
+- Moved the upstream hardware guide into `docs/hardware-design/`.
+- Standardized subdirectory README capitalization and introduced fork conventions.
+- Allowed fork-owned root README and supplemental documentation content on fork `main`.
+- Added and documented the fork-only supplemental-document directory.
+- Moved the build CI document to its dedicated CI branch before consolidation.
+- Documented clean-`main` reasons, the direct-development exception, and Actions enablement for forks.
+- Split the original agent rules into contribution, development, and fork documents with a compact root index.
+- Updated software-design and project README references for the new documentation structure.
+- Added the documentation catalog and task-triggered routing based on the earlier repository model.
+- Added bilingual contribution, code-of-conduct, security, and support documents tailored to this ESP-IDF and fork workflow.

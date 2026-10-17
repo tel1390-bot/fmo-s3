@@ -1,0 +1,84 @@
+menu "FMO Live Monitor"
+
+config FMO_WIFI_SSID
+    string "Wi-Fi SSID"
+    default ""
+    help
+        The 2.4 GHz Wi-Fi network used by AI Passport. Keep the tracked default
+        empty and configure the real value in the untracked sdkconfig file.
+
+config FMO_WIFI_PASSWORD
+    string "Wi-Fi password"
+    default ""
+    help
+        Password for the selected Wi-Fi network. Open networks may leave this
+        empty. Never commit a populated sdkconfig file.
+
+config FMO_HOST
+    string "FMO host name or IPv4 address"
+    default "fmo.local"
+    help
+        LAN address of the FMO device, without ws://, a port, or a path. An IPv4
+        address is recommended when the local network does not resolve .local.
+
+config FMO_PORT
+    int "FMO web interface port"
+    range 1 65535
+    default 80
+
+config FMO_BACKLIGHT
+    int "Initial display brightness percent"
+    range 20 100
+    default 80
+
+config FMO_VOLUME
+    int "Initial conversation volume percent"
+    range 0 100
+    default 50
+    help
+        Auto-play received FMO PCM audio after connection. UP/DOWN changes volume
+        by 10 percent; short OK toggles audio and long UP refreshes the channel.
+        Volume 0 silences audio. These runtime settings reset on reboot.
+
+config FMO_LCD_HEIGHT
+    int "LCD vertical resolution (rows)"
+    range 240 280
+    default 280
+    help
+        Your 1.59-inch SPI LCD: most kits are 240x280 (GC9107 / ST7789-compatible).
+        If the panel is 240x240, set this to 240 and rebuild. The UI layout
+        adapts automatically to both heights.
+
+config FMO_LCD_INVERT
+    bool "Invert LCD colors"
+    default y
+    help
+        Some panels ship with an inverted TFT (negative image). If colors look
+        inverted, toggle this and rebuild.
+
+config FMO_LCD_GAP_X
+    int "LCD column offset (gap X)"
+    range 0 40
+    default 0
+    help
+        Row offset used by the panel driver when the controller has no built-in
+        offset (common on GC9107). If the picture starts slightly below the top
+        edge, increase this.
+
+config FMO_LCD_GAP_Y
+    int "LCD row offset (gap Y)"
+    range 0 40
+    default 0
+    help
+        Column offset used by the panel driver. If the picture starts slightly
+        to the left/right of the active area, adjust this.
+
+config FMO_LCD_MIRROR_X
+    bool "Mirror LCD horizontally"
+    default n
+
+config FMO_LCD_MIRROR_Y
+    bool "Mirror LCD vertically"
+    default n
+
+endmenu
