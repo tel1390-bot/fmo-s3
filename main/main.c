@@ -54,7 +54,7 @@ static int s_brightness = CONFIG_FMO_BACKLIGHT;
 static fmo_display_policy_t s_display_policy;
 static int s_applied_brightness = -1;
 static atomic_bool s_display_dark;
-static bool s_ignore_gesture[BSP_BTN_COUNT];
+static bool s_ignore_gesture[BSP_BTN_OK + 1];
 static uint64_t s_display_retry_ms;
 static TaskHandle_t s_battery_task;
 
@@ -75,7 +75,10 @@ static void apply_input(const app_input_t *input)
     }
 
     bsp_btn_t button = (bsp_btn_t)input->value;
-    if ((unsigned)button >= BSP_BTN_COUNT) return;
+    // Slot bound, not hardware count: single-key port maps every event to
+    // BSP_BTN_OK (=2) while BSP_BTN_COUNT is 1. Using COUNT here silently
+    // dropped every key event, making BOOT unresponsive.
+    if ((unsigned)button >= BSP_BTN_OK + 1) return;
     fmo_display_policy_touch(&s_display_policy, monotonic_ms());
     if (input->event == BSP_BTN_PRESS) {
         // Consume the complete wake gesture, including a subsequent long press.
