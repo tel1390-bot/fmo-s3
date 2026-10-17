@@ -40,7 +40,7 @@ static uint64_t clock_ms;
 static bool clock_ready;
 static time_t clock_time(time_t *out) {
     time_t value=(time_t)1767225600+(time_t)(clock_ms/1000);
-    if(out)*out=value;return value;
+    if(out){*out=value;}return value;
 }
 static int paused, panel_dark, brightness=80, fail_sleep, fail_wake;
 static int renders, notices, requests, setups, retries, cancels;
