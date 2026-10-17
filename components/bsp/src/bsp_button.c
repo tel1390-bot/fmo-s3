@@ -7,6 +7,7 @@
 #include "bsp_button.h"
 #include "bsp_pins.h"
 #include "iot_button.h"
+#include "button_gpio.h"
 #include "esp_log.h"
 
 static const char *TAG = "bsp_btn";
@@ -29,12 +30,12 @@ esp_err_t bsp_button_init(bsp_btn_cb_t cb, void *user)
 {
     s_cb = cb; s_user = user;
 
+    const button_config_t bc = { 0 };               // 长按/短按时长用组件默认值
     const button_gpio_config_t gpio_cfg = {
-        .gpio_num     = BSP_BTN_GPIO,
-        .active_level = 0,               // BOOT 键按下为低
-    };
-    const button_config_t bc = {
+        .gpio_num          = BSP_BTN_GPIO,
+        .active_level      = 0,                     // BOOT 键按下为低
         .enable_power_save = true,
+        .disable_pull      = false,                 // 使用内部上拉
     };
     esp_err_t e = iot_button_new_gpio_device(&bc, &gpio_cfg, &s_btn);
     if (e != ESP_OK || !s_btn) {

@@ -129,7 +129,7 @@ with tempfile.TemporaryDirectory(prefix="bsp-audio-test-") as tmp:
     directory = Path(tmp)
     (directory / "audio_env.h").write_text(HEADER)
     for name in ("esp_err.h", "esp_log.h", "bsp_i2c.h", "bsp_pins.h",
-                 "driver/i2s_std.h"):
+                 "driver/i2s_std.h", "freertos/FreeRTOS.h", "freertos/task.h"):
         path = directory / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text('#include "audio_env.h"\n')
