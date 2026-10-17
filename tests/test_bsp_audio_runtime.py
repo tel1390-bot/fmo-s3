@@ -83,7 +83,7 @@ esp_err_t i2s_channel_reconfig_std_clock(i2s_chan_handle_t handle,const i2s_std_
     assert(handle==&tx && clk->sample_rate_hz==expected_rate);++reconfigs;return ESP_OK;
 }
 esp_err_t i2s_channel_write(i2s_chan_handle_t handle,const void *buf,size_t bytes,size_t *written,int timeout) {
-    assert(handle==&tx && timeout==portMAX_DELAY);assert(written);
+    assert(handle==&tx && (unsigned int)timeout==portMAX_DELAY);assert(written);
     last_buf=(const int16_t*)buf;last_bytes=bytes;*written=bytes;++writes;return write_error;
 }
 int main(void) {

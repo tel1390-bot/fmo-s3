@@ -19,6 +19,7 @@ def run():
     functions='\n'.join(extract_function(source,name) for name in
                         ('fmo_provision_get_endpoint','save_endpoint','probe_endpoint','endpoint_get','endpoint_post'))
     preamble=r'''
+#define _POSIX_C_SOURCE 200809L
 #include "fmo_endpoint.h"
 #include "fmo_wifi_profiles.h"
 #include "fmo_text.h"
